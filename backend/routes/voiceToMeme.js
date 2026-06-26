@@ -1,3 +1,7 @@
+const fs = require("fs");
+const { AssemblyAI } = require("assemblyai");
+
+
 const express = require("express");
 const multer = require("multer");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -6,6 +10,9 @@ const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const assembly = new AssemblyAI({
+  apiKey: process.env.ASSEMBLYAI_API_KEY,
+});
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -37,6 +44,20 @@ async function generateCaptionWithRetry(prompt, maxRetries = 3) {
 
   throw lastError;
 }
+async function transcribeAudio(filePath) {
+  const data = fs.readFileSync(filePath);
+
+  const transcript = await assembly.transcripts.transcribe({
+    audio: data,
+    language_code: "fr",
+  });
+
+  if (transcript.status === "error") {
+    throw new Error(transcript.error);
+  }
+
+  return transcript.text;
+}
 
 router.post("/", upload.single("audio"), async (req, res) => {
   try {
@@ -47,15 +68,24 @@ router.post("/", upload.single("audio"), async (req, res) => {
       });
     }
 
-    const fakeTranscript = `Audio reçu : ${req.file.originalname}`;
+   const transcript = await transcribeAudio(req.file.path);;
 
-    const prompt = `
-Tu es un générateur de légendes de mèmes.
-À partir de ce contexte :
-"${fakeTranscript}"
+const prompt = `
+Tu es un assistant créatif.
 
-Génère UNE légende de mème drôle, courte, naturelle, en français.
-Réponds uniquement par la légende, sans explication.
+Une transcription audio est fournie ci-dessous.
+
+Ta mission est de créer une nouvelle légende humoristique inspirée de l'ambiance générale.
+
+Règles :
+- Ne recopie jamais la transcription.
+- Ne cite jamais les paroles.
+- Ne résume pas le texte.
+- Invente une phrase drôle originale.
+- Réponds uniquement par une seule phrase en français.
+
+Transcription :
+${transcript}
 `;
 
     let caption;
@@ -72,7 +102,7 @@ Réponds uniquement par la légende, sans explication.
 
     return res.status(200).json({
       success: true,
-      transcript: fakeTranscript,
+      transcript:transcript,
       caption,
       source,
       audioInfo: {
@@ -92,6 +122,16 @@ Réponds uniquement par la légende, sans explication.
       details: error?.message || "Erreur inconnue"
     });
   }
+
+  finally {
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      if (err) {
+        console.error("Erreur suppression fichier :", err.message);
+      }
+    });
+  }
+}
 });
 
 module.exports = router;
