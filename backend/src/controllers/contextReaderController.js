@@ -6,6 +6,7 @@
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { generateImageFromPrompt } = require('../services/imageGeneratorService');
 
 // Liste des templates de mèmes prédéfinis supportés par notre système
 // Ces templates proviennent de l'API publique et gratuite 'memegen.link' qui permet de superposer du texte de manière dynamique.
@@ -64,7 +65,7 @@ function sanitizeForMemeGen(text) {
     .replace(/%/g, '~p')
     .replace(/#/g, '~h')
     .replace(/\//g, '~s')
-    .replace(/\"/g, "''")
+    .replace(/"/g, "''")
     .replace(/\s+/g, '_'); // Remplace les espaces par des underscores
 }
 
@@ -234,13 +235,22 @@ Le contexte textuel à analyser est le suivant :
     captions.forEach((cap, index) => {
       method1ImageUrl = method1ImageUrl.replace(`{caption${index + 1}}`, sanitizeForMemeGen(cap));
     });
-    // Nettoie les placeholders restants (si le template accepte 2 légendes mais que l'IA n'en a fourni qu'une)
+    // Nettoyer les placeholders restants (si le template accepte 2 légendes mais que l'IA n'en a fourni qu'une)
     method1ImageUrl = method1ImageUrl.replace(/{caption\d}/g, "_");
 
-    // Pour la méthode 2 (AI Image Generator) :
-    // On peut construire une URL d'image factice ou utiliser un service de génération si configuré.
-    // Pour cet exercice, nous fournissons le prompt optimisé généré par Gemini et une URL de placeholder visuel élégant.
-    const method2ImageUrl = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600`;
+    // --- BONUS : GÉNÉRATION D'IMAGE RÉELLE POUR LA MÉTHODE 2 ---
+    console.log("🎨 Appel du service de génération d'image IA...");
+    const imageGenerationResult = await generateImageFromPrompt(aiData.method2.prompt);
+    
+    let method2ImageUrl;
+    if (imageGenerationResult.success) {
+      method2ImageUrl = imageGenerationResult.imageUrl;
+      console.log("✅ Image IA générée avec succès.");
+    } else {
+      console.warn("⚠️ Échec de la génération d'image IA, utilisation d'un fallback.");
+      method2ImageUrl = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600`;
+    }
+    // ----------------------------------------------------------
 
     // 8. Envoi de la réponse JSON au frontend
     return res.json({
@@ -256,7 +266,7 @@ Le contexte textuel à analyser est le suivant :
         },
         method2: {
           prompt: aiData.method2.prompt,
-          imageUrl: method2ImageUrl // S'intègrera plus tard avec l'API Imagen ou DALL-E directement !
+          imageUrl: method2ImageUrl
         }
       }
     });
