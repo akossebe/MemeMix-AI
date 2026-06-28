@@ -19,9 +19,11 @@ app.use(express.json());
 
 // Importation des routes
 const contextReaderRoutes = require('./routes/contextReader');
+const voiceToMemeRoutes = require('./routes/voiceToMeme');
 
 // Enregistrement des routes de l'API
 app.use('/api/context-reader', contextReaderRoutes);
+app.use('/api/voice-to-meme', voiceToMemeRoutes);
 
 // Route de diagnostic simple (Health Check)
 app.get('/health', (req, res) => {
