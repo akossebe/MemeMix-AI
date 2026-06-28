@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Alert
 } from 'react-native';
+import Share from 'react-native-share';
 
 interface ContextResult {
   memeIdea: string;
@@ -57,6 +58,17 @@ export default function ContextReaderScreen() {
     }
   };
 
+  const handleShare = async (imageUrl: string, caption: string) => {
+    try {
+      await Share.open({
+        url: imageUrl,
+        message: caption,
+      });
+    } catch (error) {
+      console.log('Error sharing:', error);
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Context Reader</Text>
@@ -82,12 +94,24 @@ export default function ContextReaderScreen() {
             <Text style={styles.sectionTitle}>Option 1 : Template Classique</Text>
             <Image source={{ uri: result.method1.imageUrl }} style={styles.memeImage} />
             <Text style={styles.templateName}>{result.method1.templateName}</Text>
+            <TouchableOpacity 
+              style={styles.shareButton} 
+              onPress={() => handleShare(result.method1.imageUrl, result.memeIdea)}
+            >
+              <Text style={styles.shareButtonText}>📤 Partager ce mème</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.memeSection}>
             <Text style={styles.sectionTitle}>Option 2 : IA Générative</Text>
             <Image source={{ uri: result.method2.imageUrl }} style={styles.memeImage} />
             <Text style={styles.promptText}>{result.method2.prompt}</Text>
+            <TouchableOpacity 
+              style={styles.shareButton} 
+              onPress={() => handleShare(result.method2.imageUrl, result.memeIdea)}
+            >
+              <Text style={styles.shareButtonText}>📤 Partager ce mème</Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -109,4 +133,6 @@ const styles = StyleSheet.create({
   memeImage: { width: '100%', height: 300, borderRadius: 10, marginBottom: 10 },
   templateName: { fontSize: 14, color: '#888', textAlign: 'center' },
   promptText: { fontSize: 12, color: '#666', textAlign: 'center', fontStyle: 'italic' },
+  shareButton: { marginTop: 15, backgroundColor: '#03dac6', padding: 10, borderRadius: 8, width: '100%', alignItems: 'center' },
+  shareButtonText: { color: '#fff', fontWeight: 'bold' },
 });
