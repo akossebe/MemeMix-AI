@@ -1,3 +1,102 @@
+
+https://github.com/akossebe/MemeMix-AI.git
+Ce document vous explique comment récupérer le projet et
+  lancer l'environnement de développement complet (Backend + Frontend).
+
+  📋 Prérequis
+
+  Avant de commencer, assurez-vous d'avoir installé :
+   * Node.js (version >= 22)
+   * npm ou yarn
+   * React Native CLI & environnement mobile configuré (Android Studio ou Xcode)
+   * Clés API (à configurer dans le backend) :
+       * GEMINI_API_KEY (Google Generative AI)
+       * ASSEMBLYAI_API_KEY (Pour la transcription audio)
+
+  ---
+
+  🛠 1. Récupérer le projet
+
+  Le projet est organisé sur la branche dev. Utilisez la commande suivante pour
+  récupérer la dernière version stable :
+
+   1 git clone <URL_DU_REPOS>
+   2 cd MemeMixAI
+   3 git checkout dev
+   4 git pull origin dev
+
+  ---
+
+  🧠 2. Lancer le Backend (Le Cerveau)
+
+  Le backend est un serveur Node.js qui gère l'intelligence artificielle.
+
+   1. Accéder au dossier :
+   1    cd backend
+   2. Installer les dépendances :
+   1    npm install
+   3. Configurer les variables d'environnement :
+     Créez un fichier .env à la racine du dossier backend :
+
+   1    touch .env
+     Ajoutez vos clés à l'intérieur :
+
+   1    PORT=5000
+   2    GEMINI_API_KEY=votre_cle_ici
+   3    ASSEMBLYAI_API_KEY=votre_cle_ici
+   4. Démarrer le serveur :
+   1    npm start
+     Le serveur sera disponible sur http://localhost:5000.
+
+  ---
+
+  📱 3. Lancer le Frontend (L'Application Mobile)
+
+  L'application est développée avec React Native.
+
+   1. Accéder à la racine du projet :
+   1    cd ..
+   2. Installer les dépendances :
+   1    npm install
+   3. Lancer Metro (le bundler) :
+     Ouvrez un nouveau terminal et lancez :
+
+   1    npm start
+   4. Lancer sur un simulateur/appareil :
+     Dans un autre terminal :
+
+   1    # Pour Android
+   2    npm run android
+   3
+   4    # Pour iOS
+   5    npm run ios
+
+  ---
+
+  🧪 4. Comment tester l'application ?
+
+  Une fois l'application lancée, vous avez deux fonctionnalités principales à tester :
+
+  A. Mode "Context Reader" (Texte → Mème)
+   * Action : Saisissez un texte (ex: "Le café est indispensable pour coder").
+   * Résultat attendu : L'IA analyse le texte et propose deux méthodes :
+       1. Un mème classique (ex: Drake) avec des légendes humoristiques.
+       2. Une image entièrement générée par IA correspondant au contexte.
+
+  B. Mode "Voice to Meme" (Audio → Mème)
+   * Action : Enregistrez un court message audio avec une idée drôle.
+   * Résultat attendu : 
+       1. L'audio est transcrit en texte (via AssemblyAI).
+       2. Gemini génère une légende originale et percutante basée sur l'ambiance de
+          votre voix.
+
+  ---
+
+  ⚠️ Notes importantes pour les développeurs
+
+   * Mode Mock : Si vous n'avez pas de clés API, le backend est configuré pour passer
+     en "Mode Mock". Il renverra des réponses pré-enregistrées pour vous permettre de
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
